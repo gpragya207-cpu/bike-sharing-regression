@@ -28,9 +28,9 @@ Do weather conditions (temperature, humidity, weather situation) and time-of-day
 - **Target**: `cnt`, total rentals per hour
 - **Predictors**: `temp`, `hum`, `weathersit`, `hr` (bucketed into time-of-day categories), `season`
 
-## Exploratory Analysis
+## Exploratory Analysis 
 
-![By hour](plots/avg_rental_per_hour.png)
+<img src="plots/avg_rental_per_hour.png" width="500" height="350">
 
 Rentals peak sharply at 8am and 5pm, matching commute hours. Rentals also rise with temperature (r = 0.40), fall with humidity (r = -0.32), and are highest in clear weather and summer.
 
@@ -38,11 +38,11 @@ Rentals peak sharply at 8am and 5pm, matching commute hours. Rentals also rise w
 
 A from-scratch regression (manually computed correlation, slope, intercept) using temperature as the predictor:
 
-![Regression line](plots/temp_regression_line.png)
+<img src="plots/temp_regression_line.png" width="500" height="350">
 
 **r = 0.405, slope = 381.3, intercept = -0.04.** Each 1-unit increase in normalized temperature is associated with about 381 more rentals per hour.
 
-![Residuals](plots/temp_residual_plot.png)
+<img src="plots/temp_residual_plot.png" width="500" height="350">
 
 The residual plot shows heteroscedasticity (wider spread at higher temperatures), indicating temperature alone leaves substantial variation unexplained.
 
