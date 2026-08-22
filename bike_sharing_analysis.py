@@ -109,3 +109,74 @@ plt.legend()
 plt.show()
 # residual fan out at higher temperatures and rather clustered at low temperatures (heteroscedasticity)
 # %%
+
+# multiple regression with temperature, humidity, and weather situation as predictors
+# %%
+# defining a function to split the hr column into categories for encoding later
+# hour bucketed into time-of-day categories instead of used as a raw number (see README for why this mattered (fixed a sign-flip issue with weathersit))
+
+def hour_cat(hr):
+    if hr in [0, 1, 2, 3, 4, 5]:
+        return 'Night'
+    elif hr in [6, 7, 8, 9]:
+        return 'Morning Rush' # as we noted in the earlier analysis
+    elif hr in [10, 11, 12, 13, 14, 15]:
+        return 'Midday'
+    elif hr in [16, 17, 18, 19]:
+        return 'Evening Rush' # as we noted in the earlier analysis
+    else:
+        return 'Evening'
+
+hour_df['hr_cat'] = hour_df['hr'].apply(hour_cat)
+model_df = hour_df[['temp', 'hum', 'weathersit', 'hr_cat', 'season', 'cnt']]
+model_encoded = pd.get_dummies(model_df, columns=['weathersit', 'season', 'hr_cat'], drop_first=True) # drop first= True to avoid dummy variable trap
+print(model_encoded.head())
+# %%
+from sklearn.linear_model import LinearRegression
+#define the features and target variable
+X= model_encoded.drop(columns= 'cnt')
+Y = model_encoded.get('cnt')
+
+# %%
+# create and fit the linear regression model
+model = LinearRegression()
+model.fit(X, Y)
+
+# %%
+# look at the coefficients with respective feature names
+coeff=pd.Series(model.coef_, index= X.columns)
+print(coeff.sort_values(ascending=True))
+print(f'Intercept: {model.intercept_}')
+# the coefficients indicate the change in rentals for a unit change in the predictor variable, holding all other variables constant.
+# temp has the highest positive coeff and hum has the highest negative coeff
+
+# %%
+
+# previous code showed which variables matter and in what direction; now checking how well 
+# the model predicts on unseen data (train/test split)
+
+from sklearn.model_selection import train_test_split
+# %%
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+# create a new linear regression model and fit it to the training data (to keep the test data unseen)
+# 80% of the data is used for training and 20% for testing 
+
+eval_model = LinearRegression()
+eval_model.fit(X_train, Y_train) # fit the model to the training data
+
+# %%
+# small check to see if the model is working
+print(eval_model.coef_)
+# all 12 columns from coeff present) 
+
+# %%
+# %%
+from sklearn.metrics import r2_score
+
+Y_pred = eval_model.predict(X_test)
+r2 = r2_score(Y_test, Y_pred)
+print(f"R²: {r2}")
+# the multiple regression model explains approximately 54% of the variance in hourly bike rentals (R² = 0.54)
+# rest of the variation remains unexplained likely due to other factors not included in the model
+
+# %%
